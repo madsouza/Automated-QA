@@ -29,6 +29,21 @@ test_info = {'ML04': ['ML04 ML05 ML09', ['S20', 'S22', 'S24', 'S26', 'S28']],
              'ML12_p': ['ML12', ['U55', 'AE55', 'AO55', 'U58', 'AE58', 'AO58', 'U61', 'AE61', 'AO61',
                                  'U64', 'AE64', 'AO64', 'U67', 'AE67', 'AO67']],
 
+             'ML13_e': ['ML13', ['G46', 'Q46', 'AA46', 'AK46', 'G48', 'Q48', 'AA48', 'AK48',
+                                 'G50', 'Q50', 'AA50', 'AK50', 'G52', 'Q52', 'AA52', 'AK52',
+                                 'G54', 'Q54', 'AA54', 'AK54']],
+             'ML13_p': ['ML13', ['G27', 'Q27', 'AA27', 'AK47', 'G29', 'Q29', 'AA29', 'AK29',
+                                 'G31', 'Q31', 'AA31', 'AK31', 'G33', 'Q33', 'AA33', 'AK33',
+                                 'G35', 'Q35', 'AA35', 'AK35']],
+
+             'ML14': ['ML14 ML15', ['H18', 'O18', 'H20', 'O20', 'H22', 'O22',
+                                    'H24', 'O24', 'H26', 'O26', 'H28', 'O28']],
+
+             'ML15': ['ML14 ML15', ['U44', 'U46', 'U48', 'U50', 'U52', 'U54', 'U56', 'U58', 'U60', 'U62']],
+
+             'ML17_iRA_2_06X': ['ML17-18', ['J23', 'J24', 'J25']],
+             'ML17_qMLC_06X': ['ML17-18', ['J23', 'J24', 'J25']],
+
              'DTRR': ['DTRR, DIME', ['T27']],
              'DIME': ['DTRR, DIME', ['T56']]}
 
@@ -38,7 +53,8 @@ def get_test(machine, test_number):
     # glob loads all files in a folder
     files = glob.glob(test_path)
     # filter to files containing ml_04
-    files = filter(lambda a: test_number in a, files)
+    file_name = test_number.split('_')[0]
+    files = filter(lambda a: file_name in a, files)
     # check that file exists
     if not files:
 
@@ -46,24 +62,28 @@ def get_test(machine, test_number):
 
     # check if 2 files present
     elif len(files) > 1:
-        # if so remove file with yyyy-mm-dd
-        files = filter(lambda b: 'mm-dd' in b, files)
+        # if so remove temp files
+        files = filter(lambda b: '~$' not in b, files)
+    elif len(files) > 1:
+        files = filter(lambda b: 'mm-dd' not in b, files)
+
     try:
+        print(files)
         qa_file = load_workbook(files[0], data_only=True)
         qa_sheet = qa_file[test_info[test_number][0]]
     except:
-
+        print files
         return 'duplicate files'
     values_to_submit = [qa_sheet[c].value for c in test_info[test_number][1]]
 
     if None in values_to_submit:
         return 'empty value'
     try:
-        values_to_submit = map(int, values_to_submit)
+        values_to_submit = map(float, values_to_submit)
     except:
         values_to_submit = map(str, values_to_submit)
 
     return values_to_submit
 
 if __name__ == "__main__":
-    print get_test('RT2', 'DIME')
+    print get_test('RT1', 'ML17_iRA_2_06X')
