@@ -77,7 +77,7 @@ class Window(pyglet.window.Window):
                 for child in sorted(organized_tests[item]):
                     self.child_test_labels.append(pyglet.text.Label(child, font_name='Helvetica', font_size=8,
                                                                     x=2 * Window.width.__get__(self) / 7 +
-                                                                      x_count * x_spacing,
+                                                                    x_count * x_spacing,
                                                                     y=remaining_space[0] - count * spacing,
                                                                     anchor_x='center', anchor_y='center',
                                                                     color=(0, 147, 199, 255)))
@@ -89,6 +89,7 @@ class Window(pyglet.window.Window):
             temp_sprite = pyglet.sprite.Sprite(green, x=Window.width.__get__(self) / 7 / 2,
                                                y=remaining_space[0] - count * spacing -
                                                0.5 * spacing)
+            temp_sprite.visible = False
             self.unique_test_sprites.append([temp_sprite, temp_sprite.position, [temp_sprite.x + temp_sprite.width,
                                                                                  temp_sprite.y + temp_sprite.height]])
             count += 1
@@ -103,19 +104,20 @@ class Window(pyglet.window.Window):
         [l.draw() for l in self.child_test_labels]
 
     def on_mouse_press(self, x, y, button, modifiers):
+
+        # print self.unique_test_sprites[0][1][0]
         # print x
-        # print y
-        # print button
-        # print self.unique_test_sprites[0]
-        print self.unique_test_sprites[0][1][0]
-        print x
-        print self.unique_test_sprites[0][2][0]
-        # for item in self.unique_test_sprites:
-        #     if item[1][0] < x < item[2][0] and item[2][0] > y > item[1][0]:
-        #         print True
-        #         break
-        #     else:
-        #         print False
+        # print self.unique_test_sprites[0][2][0]
+        # print self.unique_test_sprites[0][1][0] < x < self.unique_test_sprites[0][2][0] and
+        # self.unique_test_sprites[0][1][1] < y < self.unique_test_sprites[0][2][1]
+        for n in range(0, len(self.unique_test_sprites)):
+            item = self.unique_test_sprites[n]
+            if item[1][0] < x < item[2][0] and item[1][1] < y < item[2][1]:
+                print True
+                self.unique_test_sprites[n][0].visible = not(self.unique_test_sprites[n][0].visible)
+                break
+
+
 
 
 def main():
