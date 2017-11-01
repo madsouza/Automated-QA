@@ -3,6 +3,7 @@ from pyglet.gl import gl
 import Tests
 
 
+# get all our test names and get unique parent tests (i.e ML11 from ML11_e and ML11_p)
 tests = Tests.tests()
 unique_tests = list(set([t.split('_')[0] for t in tests.test_info.keys()]))
 unique_tests.sort()
@@ -16,10 +17,10 @@ for t in tests.test_info:
         organized_tests[parent_test].append(t)
 
 print organized_tests
+
 background_color = (0.98, 0.98, 0.98, 1)
 
 
-# window = pyglet.window.Window(1000, 600)
 
 
 class Window(pyglet.window.Window):
@@ -35,6 +36,7 @@ class Window(pyglet.window.Window):
         self.child_test_labels = []
         self.background_color = (0.98, 0.98, 0.98, 1)
         self.active_machine = 0
+        #                      RT1 RT2 RT3 RT4 RT5 RT6
         self.tests_to_submit = [[], [], [], [], [], []]
         self.generate_labels_sprites()
 
@@ -45,6 +47,7 @@ class Window(pyglet.window.Window):
                                        anchor_x='center', anchor_y='center', height=Window.height.__get__(self),
                                        color=(0, 147, 199, 255))
 
+        # display machine name and sprites at the top of the interface
         for i in range(1, 7):
             self.machineLabels.append(pyglet.text.Label('RT%s' % i,
                                                         font_name='Helvetica',
@@ -60,20 +63,25 @@ class Window(pyglet.window.Window):
             temp_sprite = pyglet.sprite.Sprite(green, x=i*Window.width.__get__(self) / 7 -
                                                         Window.width.__get__(self) / 7/2,
                                                y=(6.75 * Window.height.__get__(self) / 8))
-            # temp_sprite.visible = False
+
+            # set the first machine label to be selected (default machine) by setting the visibility of the others to
+            #   False
             if i > 1:
                 temp_sprite.visible = False
 
+            # store in list of the form [sprite, [x,y coordinates of bottom left], [x,y coordinates of top right]]
             self.machine_sprites.append([temp_sprite, temp_sprite.position, [temp_sprite.x + temp_sprite.width,
                                                                              temp_sprite.y + temp_sprite.height]])
-            # self.machine_sprites.append()
 
+        # lets see how much space is left in the window
         remaining_space = [6.5 * Window.height.__get__(self) / 8, 0]
 
+        # divide that by the total number of tests
         spacing = (remaining_space[0] - remaining_space[1]) / len(unique_tests)
 
         count = 0
 
+        # set parent tests along the left column, if child tests are present display them next to the parents
         for item in unique_tests:
             self.unique_test_labels.append(pyglet.text.Label(item, font_name='Helvetica', font_size=12,
                                                              x=Window.width.__get__(self) / 7,
@@ -95,6 +103,7 @@ class Window(pyglet.window.Window):
                                                                     anchor_x='center', anchor_y='center',
                                                                     color=(0, 147, 199, 255)))
                     x_count += 1
+
             green = pyglet.image.load('green.png')
             green.width = int(Window.width.__get__(self) / 7)
             green.height = int(spacing - 2)
@@ -158,7 +167,7 @@ class Window(pyglet.window.Window):
 
 
 def main():
-    window = Window(width=1000, height=600, caption='QA Submitter v0.5', resizable=True)
+    window = Window(width=1000, height=600, caption='QA Submitter v0.7')
     pyglet.app.run()
 
 
