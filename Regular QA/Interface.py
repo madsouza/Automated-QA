@@ -2,12 +2,6 @@ import pyglet
 from pyglet.gl import gl
 import Tests
 
-RT1 = []
-RT2 = []
-RT3 = []
-RT4 = []
-RT5 = []
-RT6 = []
 
 tests = Tests.tests()
 unique_tests = list(set([t.split('_')[0] for t in tests.test_info.keys()]))
@@ -40,6 +34,8 @@ class Window(pyglet.window.Window):
         self.unique_test_sprites = []
         self.child_test_labels = []
         self.background_color = (0.98, 0.98, 0.98, 1)
+        self.active_machine = 0
+        self.tests_to_submit = [[], [], [], [], [], []]
         self.generate_labels_sprites()
 
     def generate_labels_sprites(self):
@@ -56,12 +52,18 @@ class Window(pyglet.window.Window):
                                                         x=i * Window.width.__get__(self) / 7,
                                                         y=7 * Window.height.__get__(self) / 8,
                                                         anchor_x='center', anchor_y='center', color=(0, 147, 199, 255)))
+
             green = pyglet.image.load('green.png')
-            green.width = int(i*Window.width.__get__(self) / 7)
-            green.height = int(7 * Window.height.__get__(self) / 8)
-            temp_sprite = pyglet.sprite.Sprite(green, x=i*Window.width.__get__(self) / 7 / 2,
-                                               y=7 * Window.height.__get__(self) / 8)
-            #temp_sprite.visible = False
+            green.width = int(Window.width.__get__(self) / 7)
+            green.height = int(Window.height.__get__(self) / 8 - 40)
+
+            temp_sprite = pyglet.sprite.Sprite(green, x=i*Window.width.__get__(self) / 7 -
+                                                        Window.width.__get__(self) / 7/2,
+                                               y=(6.75 * Window.height.__get__(self) / 8))
+            # temp_sprite.visible = False
+            if i > 1:
+                temp_sprite.visible = False
+
             self.machine_sprites.append([temp_sprite, temp_sprite.position, [temp_sprite.x + temp_sprite.width,
                                                                              temp_sprite.y + temp_sprite.height]])
             # self.machine_sprites.append()
@@ -102,8 +104,13 @@ class Window(pyglet.window.Window):
                                                0.5 * spacing)
             temp_sprite.visible = False
             self.unique_test_sprites.append([temp_sprite, temp_sprite.position, [temp_sprite.x + temp_sprite.width,
-                                                                                 temp_sprite.y + temp_sprite.height]])
+                                                                                 temp_sprite.y + temp_sprite.height],
+                                             item])
+
+            [a.append(False) for a in self.tests_to_submit]
             count += 1
+
+
 
     def on_draw(self):
         gl.glClearColor(*background_color)
@@ -117,22 +124,41 @@ class Window(pyglet.window.Window):
 
     def on_mouse_press(self, x, y, button, modifiers):
 
-        # print self.unique_test_sprites[0][1][0]
-        # print x
-        # print self.unique_test_sprites[0][2][0]
-        # print self.unique_test_sprites[0][1][0] < x < self.unique_test_sprites[0][2][0] and
-        # self.unique_test_sprites[0][1][1] < y < self.unique_test_sprites[0][2][1]
-        for n in range(0, len(self.unique_test_sprites)):
-            item = self.unique_test_sprites[n]
-            if item[1][0] < x < item[2][0] and item[1][1] < y < item[2][1]:
-                print True
-                self.unique_test_sprites[n][0].visible = not self.unique_test_sprites[n][0].visible
-                print self.unique_test_sprites[n][0].visible
-                break
+        cycle = True
+        while cycle:
+            for n in range(0, len(self.machine_sprites)):
+                item = self.machine_sprites[n]
+                if item[1][0] < x < item[2][0] and item[1][1] < y < item[2][1]:
+                    if self.machine_sprites[n][0].visible:
+                        print 'is visible'
+                        cycle = False
+                    else:
+                        print 'turned on'
+                        self.machine_sprites[n][0].visible = not self.machine_sprites[n][0].visible
+                        self.active_machine = n
+                        print self.active_machine
+                        for a in range(0, len(self.machine_sprites)):
+                            if a != n:
+                                self.machine_sprites[a][0].visible = False
+
+                        for a in range(0, len(self.unique_test_sprites)):
+                            self.unique_test_sprites[a][0].visible = self.tests_to_submit[self.active_machine][a]
+
+                        cycle = False
+
+            for n in range(0, len(self.unique_test_sprites)):
+                item = self.unique_test_sprites[n]
+                if item[1][0] < x < item[2][0] and item[1][1] < y < item[2][1]:
+                    self.unique_test_sprites[n][0].visible = not self.unique_test_sprites[n][0].visible
+                    self.tests_to_submit[self.active_machine][n] = self.unique_test_sprites[n][0].visible
+                    print self.unique_test_sprites[n][0].visible
+                    break
+
+            cycle = False
 
 
 def main():
-    window = Window(width=1000, height=600, caption='QA Submitter 9000', resizable=True)
+    window = Window(width=1000, height=600, caption='QA Submitter v0.5', resizable=True)
     pyglet.app.run()
 
 
