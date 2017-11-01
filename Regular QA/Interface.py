@@ -35,6 +35,7 @@ class Window(pyglet.window.Window):
         print Window.width.__get__(self)
         print getattr(Window, 'width')
         self.machineLabels = []
+        self.machine_sprites = []
         self.unique_test_labels = []
         self.unique_test_sprites = []
         self.child_test_labels = []
@@ -42,6 +43,7 @@ class Window(pyglet.window.Window):
         self.generate_labels_sprites()
 
     def generate_labels_sprites(self):
+
         self.label = pyglet.text.Label('QA submission', font_name='Helvetica', font_size=30,
                                        x=Window.width.__get__(self) // 2, y=Window.height.__get__(self) // 2,
                                        anchor_x='center', anchor_y='center', height=Window.height.__get__(self),
@@ -54,6 +56,15 @@ class Window(pyglet.window.Window):
                                                         x=i * Window.width.__get__(self) / 7,
                                                         y=7 * Window.height.__get__(self) / 8,
                                                         anchor_x='center', anchor_y='center', color=(0, 147, 199, 255)))
+            green = pyglet.image.load('green.png')
+            green.width = int(i*Window.width.__get__(self) / 7)
+            green.height = int(7 * Window.height.__get__(self) / 8)
+            temp_sprite = pyglet.sprite.Sprite(green, x=i*Window.width.__get__(self) / 7 / 2,
+                                               y=7 * Window.height.__get__(self) / 8)
+            #temp_sprite.visible = False
+            self.machine_sprites.append([temp_sprite, temp_sprite.position, [temp_sprite.x + temp_sprite.width,
+                                                                             temp_sprite.y + temp_sprite.height]])
+            # self.machine_sprites.append()
 
         remaining_space = [6.5 * Window.height.__get__(self) / 8, 0]
 
@@ -99,6 +110,7 @@ class Window(pyglet.window.Window):
         Window.clear(self)
         self.label.draw()
         [l[0].draw() for l in self.unique_test_sprites]
+        [l[0].draw() for l in self.machine_sprites]
         [l.draw() for l in self.machineLabels]
         [l.draw() for l in self.unique_test_labels]
         [l.draw() for l in self.child_test_labels]
@@ -114,16 +126,14 @@ class Window(pyglet.window.Window):
             item = self.unique_test_sprites[n]
             if item[1][0] < x < item[2][0] and item[1][1] < y < item[2][1]:
                 print True
-                self.unique_test_sprites[n][0].visible = not(self.unique_test_sprites[n][0].visible)
+                self.unique_test_sprites[n][0].visible = not self.unique_test_sprites[n][0].visible
+                print self.unique_test_sprites[n][0].visible
                 break
-
-
 
 
 def main():
     window = Window(width=1000, height=600, caption='QA Submitter 9000', resizable=True)
     pyglet.app.run()
-
 
 
 main()
