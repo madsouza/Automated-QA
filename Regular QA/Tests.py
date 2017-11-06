@@ -4,6 +4,7 @@ path = 'Machines'
 # testinfo
 #   test: [sheet, [excel cells]]
 
+
 class tests:
     test_info = {'ML04': ['ML04 ML05 ML09', ['S20', 'S22', 'S24', 'S26', 'S28']],
 
@@ -89,6 +90,7 @@ class tests:
             values_to_submit = map(str, values_to_submit)
 
         return values_to_submit
+
 
 if __name__ == "__main__":
     tests = tests()
