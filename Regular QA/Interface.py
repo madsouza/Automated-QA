@@ -2,7 +2,6 @@ import pyglet
 from pyglet.gl import gl
 import Tests
 
-
 # get all our test names and get unique parent tests (i.e ML11 from ML11_e and ML11_p)
 tests = Tests.tests()
 unique_tests = list(set([t.split('_')[0] for t in tests.test_info.keys()]))
@@ -19,6 +18,35 @@ for t in tests.test_info:
 print organized_tests
 
 background_color = (0.98, 0.98, 0.98, 1)
+
+
+class ConfirmationWindow(pyglet.window.Window):
+    def __init__(self, selected_tests, *args, **kwargs):
+        super(ConfirmationWindow, self).__init__(*args, **kwargs)
+        self.width = ConfirmationWindow.width.__get__(self)
+        self.height = ConfirmationWindow.height.__get__(self)
+        self.selected_tests = selected_tests
+        self.background_color = (0.98, 0.98, 0.98, 1)
+        self.labels = []
+        for i in range(1, 7):
+            self.labels.append(pyglet.text.Label('RT%s' % i, font_name='Helvetica', font_size=18,
+                                                 x=i * self.width / 7, y=7.5 * self.height / 8, bold=True,
+                                                 anchor_x='center', anchor_y='center',
+                                                 color=(0, 147, 199, 255)))
+            remaining_height = [int(6.5 * self.height / 8), int(1.5 * self.height / 8)]
+            if len(self.selected_tests['RT%s' % i]) > 0:
+                spacing = int((remaining_height[0] - remaining_height[1])/(len(self.selected_tests['RT%s' % i])))
+            for x in range(0, len(self.selected_tests['RT%s' % i])):
+                self.labels.append(pyglet.text.Label(self.selected_tests['RT%s' % i][x], font_name='Helvetica',
+                                                     font_size=12, bold=True,
+                                                     x=i * self.width / 7, y=remaining_height[0] - x * spacing,
+                                                     anchor_x='center', anchor_y='center',
+                                                     color=(0, 147, 199, 255)))
+
+    def on_draw(self):
+        gl.glClearColor(*background_color)
+        ConfirmationWindow.clear(self)
+        [l.draw() for l in self.labels]
 
 
 class Window(pyglet.window.Window):
@@ -62,8 +90,8 @@ class Window(pyglet.window.Window):
             green.width = int(self.width / 7)
             green.height = int(self.height / 8 - 40)
 
-            temp_sprite = pyglet.sprite.Sprite(green, x=i*self.width / 7 -
-                                                        self.width / 7/2,
+            temp_sprite = pyglet.sprite.Sprite(green, x=i * self.width / 7 -
+                                                        self.width / 7 / 2,
                                                y=(6.75 * self.height / 8))
 
             # set the first machine label to be selected (default machine) by setting the visibility of the others to
@@ -100,7 +128,7 @@ class Window(pyglet.window.Window):
                 for child in sorted(organized_tests[item]):
                     self.child_test_labels.append(pyglet.text.Label(child, font_name='Helvetica', font_size=8,
                                                                     x=2 * self.width / 7 +
-                                                                    x_count * x_spacing,
+                                                                      x_count * x_spacing,
                                                                     y=remaining_space[0] - count * spacing,
                                                                     anchor_x='center', anchor_y='center',
                                                                     color=(0, 147, 199, 255)))
@@ -112,7 +140,7 @@ class Window(pyglet.window.Window):
             print remaining_space[0]
             temp_sprite = pyglet.sprite.Sprite(green, x=self.width / 7 / 2,
                                                y=remaining_space[0] - count * spacing -
-                                               0.5 * spacing)
+                                                 0.5 * spacing)
             temp_sprite.visible = False
             self.unique_test_sprites.append([temp_sprite, temp_sprite.position, [temp_sprite.x + temp_sprite.width,
                                                                                  temp_sprite.y + temp_sprite.height],
@@ -123,27 +151,27 @@ class Window(pyglet.window.Window):
 
     def generate_button(self):
         self.vertex_list = pyglet.graphics.vertex_list(8, ('v2f', (  # horizontal lines
-                                                                   5.5 * self.width / 7,
-                                                                   6.9 * self.height / 7,
-                                                                   6.5 * self.width / 7,
-                                                                   6.9 * self.height / 7,
+            5.5 * self.width / 7,
+            6.9 * self.height / 7,
+            6.5 * self.width / 7,
+            6.9 * self.height / 7,
 
-                                                                   5.5 * self.width / 7,
-                                                                   6.5 * self.height / 7,
-                                                                   6.5 * self.width / 7,
-                                                                   6.5 * self.height / 7,
+            5.5 * self.width / 7,
+            6.5 * self.height / 7,
+            6.5 * self.width / 7,
+            6.5 * self.height / 7,
 
-                                                                   # vertical lines
-                                                                   5.5 * self.width / 7,
-                                                                   6.9 * self.height / 7,
-                                                                   5.5 * self.width / 7,
-                                                                   6.5 * self.height / 7,
+            # vertical lines
+            5.5 * self.width / 7,
+            6.9 * self.height / 7,
+            5.5 * self.width / 7,
+            6.5 * self.height / 7,
 
-                                                                   6.5 * self.width / 7,
-                                                                   6.9 * self.height / 7,
-                                                                   6.5 * self.width / 7,
-                                                                   6.5 * self.height / 7,)),
-                                                       ('c3B', (0, 0, 200)*8))
+            6.5 * self.width / 7,
+            6.9 * self.height / 7,
+            6.5 * self.width / 7,
+            6.5 * self.height / 7,)),
+                                                       ('c3B', (0, 0, 200) * 8))
         green = pyglet.image.load('green.png')
         green.width = int(1.01 * self.width / 7)
         green.height = int(0.4 * self.height / 7)
@@ -153,7 +181,7 @@ class Window(pyglet.window.Window):
         temp_sprite.visible = True
         self.button_sprites.append([temp_sprite, temp_sprite.position, [temp_sprite.x + temp_sprite.width,
                                                                         temp_sprite.y + temp_sprite.height],
-                                         item])
+                                    item])
 
         green = pyglet.image.load('green_2.jpg')
         green.width = int(1.01 * self.width / 7)
@@ -164,7 +192,7 @@ class Window(pyglet.window.Window):
         temp_sprite.visible = False
         self.button_sprites.append([temp_sprite, temp_sprite.position, [temp_sprite.x + temp_sprite.width,
                                                                         temp_sprite.y + temp_sprite.height],
-                                         item])
+                                    item])
 
         self.unique_test_labels.append(pyglet.text.Label('SUBMIT', font_name='Helvetica', font_size=14,
                                                          x=6 * self.width / 7,
@@ -186,7 +214,7 @@ class Window(pyglet.window.Window):
 
     def on_mouse_motion(self, x, y, dx, dy):
         if 5.5 * self.width / 7 < x < 6.5 * self.width / 7 and \
-           6.5 * self.height / 7 < y < 6.9 * self.height / 7:
+                                                6.5 * self.height / 7 < y < 6.9 * self.height / 7:
             self.button_sprites[0][0].visible = False
             self.button_sprites[1][0].visible = True
         else:
@@ -198,16 +226,27 @@ class Window(pyglet.window.Window):
         cycle = True
         while cycle:
             if 5.5 * self.width / 7 < x < 6.5 * self.width / 7 and \
-               6.5 * self.height / 7 < y < 6.9 * self.height / 7:
+                                                    6.5 * self.height / 7 < y < 6.9 * self.height / 7:
                 print ('submit')
-                cycle = False
+                selected_tests = {}
+                for machine_num in range(0, len(self.tests_to_submit)):
+                    selected_tests['RT%s' % str(machine_num + 1)] = \
+                        [unique_tests[m] for m in
+                         [i for i, x in enumerate(self.tests_to_submit[machine_num]) if x]]
+
+                print selected_tests
+                confirmation_window = ConfirmationWindow(selected_tests, width=700, height=500,
+                                                         caption='Please confirm')
+
             for n in range(0, len(self.machine_sprites)):
                 item = self.machine_sprites[n]
 
                 if item[1][0] < x < item[2][0] and item[1][1] < y < item[2][1]:
                     if self.machine_sprites[n][0].visible:
                         print 'is visible'
+
                         cycle = False
+
                     else:
                         print 'turned on'
                         self.machine_sprites[n][0].visible = not self.machine_sprites[n][0].visible
