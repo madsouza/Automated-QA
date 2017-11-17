@@ -28,6 +28,29 @@ class ConfirmationWindow(pyglet.window.Window):
         self.selected_tests = selected_tests
         self.background_color = (0.98, 0.98, 0.98, 1)
         self.labels = []
+        self.vertex_list = pyglet.graphics.vertex_list(8, ('v2f', (
+            # horizontal lines
+            2 * self.width / 7,
+            1 * self.height / 7,
+            5 * self.width / 7,
+            1 * self.height / 7,
+
+            2 * self.width / 7,
+            0.25 * self.height / 7,
+            5 * self.width / 7,
+            0.25 * self.height / 7,
+
+            # vertical lines
+            2 * self.width / 7,
+            1 * self.height / 7,
+            2 * self.width / 7,
+            0.25 * self.height / 7,
+
+            5 * self.width / 7,
+            1 * self.height / 7,
+            5 * self.width / 7,
+            0.25 * self.height / 7,)), ('c3B', (0, 0, 200) * 8))
+
         for i in range(1, 7):
             self.labels.append(pyglet.text.Label('RT%s' % i, font_name='Helvetica', font_size=18,
                                                  x=i * self.width / 7, y=7.5 * self.height / 8, bold=True,
@@ -43,10 +66,50 @@ class ConfirmationWindow(pyglet.window.Window):
                                                      anchor_x='center', anchor_y='center',
                                                      color=(0, 147, 199, 255)))
 
+        green = pyglet.image.load('green.png')
+        green.width = int(3 * self.width / 7)
+        green.height = int(0.75 * self.height / 7)
+
+        self.idle_button = pyglet.sprite.Sprite(green, x=2 * self.width / 7, y=0.25 * self.height / 7)
+
+        green_2 = pyglet.image.load('green_2.jpg')
+        green_2.width = int(3 * self.width / 7)
+        green_2.height = int(0.75 * self.height / 7)
+
+        self.mouse_over_button = pyglet.sprite.Sprite(green_2, x=2 * self.width / 7, y=0.25 * self.height / 7)
+        self.mouse_over_button.visible = False
+
+        self.confirm_label = pyglet.text.Label('CONFIRM', font_name='Helvetica', font_size=18,
+                                                         x=3.5 * self.width / 7,
+                                                         y=0.625 * self.height / 7,
+                                                         anchor_x='center', anchor_y='center',
+                                                         color=(0, 147, 199, 255), bold=True)
+
+
     def on_draw(self):
         gl.glClearColor(*background_color)
         ConfirmationWindow.clear(self)
         [l.draw() for l in self.labels]
+        self.mouse_over_button.draw()
+        self.idle_button.draw()
+        self.vertex_list.draw(pyglet.gl.GL_LINES)
+        self.confirm_label.draw()
+
+    def on_mouse_motion(self, x, y, dx, dy):
+        if 2 * self.width / 7 < x < 5 * self.width / 7 and \
+                                                0.25 * self.height / 7 < y < self.height / 7:
+            self.idle_button.visible = False
+            self.mouse_over_button.visible = True
+        else:
+            self.idle_button.visible = True
+            self.mouse_over_button.visible = False
+
+    def on_mouse_press(self, x, y, button, modifiers):
+        if 2 * self.width / 7 < x < 5 * self.width / 7 and \
+                                                0.25 * self.height / 7 < y < self.height / 7:
+            pass
+
+
 
 
 class Window(pyglet.window.Window):
