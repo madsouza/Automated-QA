@@ -107,9 +107,11 @@ class ConfirmationWindow(pyglet.window.Window):
     def on_mouse_press(self, x, y, button, modifiers):
         if 2 * self.width / 7 < x < 5 * self.width / 7 and \
                                                 0.25 * self.height / 7 < y < self.height / 7:
-            pass
-
-
+            obtained_values = []
+            for mach, list_val in sorted(self.selected_tests.items()):
+                for val in list_val:
+                    obtained_values.append([mach, val, tests.get_test(mach, val)])
+            print obtained_values
 
 
 class Window(pyglet.window.Window):
