@@ -62,9 +62,10 @@ class tests:
         file_name = test_number.split('_')[0]
         files = filter(lambda a: file_name in a, files)
         # check that file exists
+
         if not files:
 
-            return 'no file'
+            return [[machine, test_number, 'nf']]
 
         # check if 2 files present
         elif len(files) > 1:
@@ -74,24 +75,35 @@ class tests:
             files = filter(lambda b: 'mm-dd' not in b, files)
 
         try:
-            print(files)
+
             qa_file = load_workbook(files[0], data_only=True)
             qa_sheet = qa_file[self.test_info[test_number][0]]
+        except KeyError:
+            test_keys = self.test_info.keys()
+            test_keys = filter(lambda x: test_number in x, test_keys)
+            values_to_submit = [val for sublist in [self.get_test(machine, x) for x in test_keys] for val in sublist]
+            errors = map(lambda x: type(x[2]) != list, values_to_submit)
+            print errors
+            if True in errors:
+                return [[machine, test_number, 'ev']]
+            else:
+                return values_to_submit
+
+
         except:
-            print files
-            return 'duplicate files'
+            return [[machine, test_number, 'df']]
         values_to_submit = [qa_sheet[c].value for c in self.test_info[test_number][1]]
 
         if None in values_to_submit:
-            return 'empty value'
+            return [[machine, test_number, 'ev']]
         try:
             values_to_submit = map(float, values_to_submit)
         except:
             values_to_submit = map(str, values_to_submit)
 
-        return values_to_submit
+        return [[machine, test_number, values_to_submit]]
 
 
 if __name__ == "__main__":
     tests = tests()
-    print tests.get_test('RT1', 'DTRR')
+    print tests.get_test('RT1', 'ML11')
