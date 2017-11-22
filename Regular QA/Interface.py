@@ -21,6 +21,7 @@ background_color = (0.98, 0.98, 0.98, 1)
 
 
 class ConfirmationWindow(pyglet.window.Window):
+
     def __init__(self, selected_tests, *args, **kwargs):
         super(ConfirmationWindow, self).__init__(*args, **kwargs)
         self.width = ConfirmationWindow.width.__get__(self)
@@ -110,13 +111,28 @@ class ConfirmationWindow(pyglet.window.Window):
             obtained_values = []
             for mach, list_val in sorted(self.selected_tests.items()):
                 for val in list_val:
-                    obtained_values.append([mach, val, tests.get_test(mach, val)])
+                    # obtained_values.append([mach, val, tests.get_test(mach, val)])
+                    obtained_values += tests.get_test(mach, val)
             print obtained_values
+            print self.selected_tests
+            text_labels = [str(x.text) for x in self.labels]
+            for item in obtained_values:
+                if type(item[2]) != list:
+                    if '_' in item[1]:
+                        parent_test_name = item[1][:4]
+                    else:
+                        parent_test_name = item[1]
+                    mach_index = text_labels.index(item[0])
+                    indices = [i for i, x in enumerate(text_labels) if x == parent_test_name]
+                    print indices
+                    final_index = (e for e in indices if e > mach_index).next()
+                    self.labels[final_index].text = '%s: %s' % (item[1], item[2])
 
 
 class Window(pyglet.window.Window):
     def __init__(self, *args, **kwargs):
         super(Window, self).__init__(*args, **kwargs)
+        print 'initializing'
         self.label = None
         self.width = Window.width.__get__(self)
         self.height = Window.height.__get__(self)
@@ -202,7 +218,7 @@ class Window(pyglet.window.Window):
             green = pyglet.image.load('green.png')
             green.width = int(self.width / 7)
             green.height = int(spacing - 2)
-            print remaining_space[0]
+            # print remaining_space[0]
             temp_sprite = pyglet.sprite.Sprite(green, x=self.width / 7 / 2,
                                                y=remaining_space[0] - count * spacing -
                                                  0.5 * spacing)
@@ -299,7 +315,7 @@ class Window(pyglet.window.Window):
                         [unique_tests[m] for m in
                          [i for i, x in enumerate(self.tests_to_submit[machine_num]) if x]]
 
-                print selected_tests
+                # print selected_tests
                 confirmation_window = ConfirmationWindow(selected_tests, width=700, height=500,
                                                          caption='Please confirm')
 
@@ -308,12 +324,12 @@ class Window(pyglet.window.Window):
 
                 if item[1][0] < x < item[2][0] and item[1][1] < y < item[2][1]:
                     if self.machine_sprites[n][0].visible:
-                        print 'is visible'
+                        # print 'is visible'
 
                         cycle = False
 
                     else:
-                        print 'turned on'
+                        # print 'turned on'
                         self.machine_sprites[n][0].visible = not self.machine_sprites[n][0].visible
                         self.active_machine = n
                         print self.active_machine
@@ -331,13 +347,14 @@ class Window(pyglet.window.Window):
                 if item[1][0] < x < item[2][0] and item[1][1] < y < item[2][1]:
                     self.unique_test_sprites[n][0].visible = not self.unique_test_sprites[n][0].visible
                     self.tests_to_submit[self.active_machine][n] = self.unique_test_sprites[n][0].visible
-                    print self.unique_test_sprites[n][0].visible
+                    # print self.unique_test_sprites[n][0].visible
                     break
 
             cycle = False
 
 
 def main():
+    print 'creating window'
     window = Window(width=1000, height=600, caption='QA Submitter v0.7')
     pyglet.app.run()
 
