@@ -1,6 +1,11 @@
 import pyglet
 from pyglet.gl import gl
 import Tests
+import os
+import qatrack
+
+# copies files from qa folder and puts it in our directory
+os.system("del_copy.bat")
 
 # get all our test names and get unique parent tests (i.e ML11 from ML11_e and ML11_p)
 tests = Tests.tests()
@@ -116,6 +121,7 @@ class ConfirmationWindow(pyglet.window.Window):
             print obtained_values
             print self.selected_tests
             text_labels = [str(x.text) for x in self.labels]
+            print obtained_values
             for item in obtained_values:
                 if type(item[2]) != list:
                     if '_' in item[1]:
@@ -127,6 +133,8 @@ class ConfirmationWindow(pyglet.window.Window):
                     print indices
                     final_index = (e for e in indices if e > mach_index).next()
                     self.labels[final_index].text = '%s: %s' % (item[1], item[2])
+                else:
+                    qatrack.submit(qatrack.test_number(item[0], item[1]), item[2])
 
 
 class Window(pyglet.window.Window):
@@ -355,7 +363,7 @@ class Window(pyglet.window.Window):
 
 def main():
     print 'creating window'
-    window = Window(width=1000, height=600, caption='QA Submitter v0.7')
+    window = Window(width=1000, height=600, caption='QA Submitter v0.9')
     pyglet.app.run()
 
 
