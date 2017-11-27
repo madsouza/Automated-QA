@@ -1,4 +1,11 @@
 Machines/
+Machines2/
+Machines3/
 .idea/
 Tests.pyc
+qatrack.pyc
 Regular QA/user_info
+Regular QA/del_copy.bat
+Regular QA/test_urls.xlsx
+build/
+dist/
