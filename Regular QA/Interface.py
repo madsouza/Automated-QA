@@ -26,12 +26,12 @@ background_color = (0.98, 0.98, 0.98, 1)
 
 
 class ProgressWindow(pyglet.window.Window):
-    def __init__(self, selected_tests, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super(ProgressWindow, self).__init__(*args, **kwargs)
         self.width = ConfirmationWindow.width.__get__(self)
         self.height = ConfirmationWindow.height.__get__(self)
-        self.label = pyglet.text.Label('Please wait in progress', font_name='Helvetica', font_size=20,
-                                        x=100,
+        self.label = pyglet.text.Label('Please wait, submission in progress', font_name='Helvetica', font_size=20,
+                                        x=250,
                                         y=50,
                                         anchor_x='center', anchor_y='center',
                                         color=(0, 147, 199, 255), bold=True)
@@ -42,6 +42,7 @@ class ProgressWindow(pyglet.window.Window):
         ProgressWindow.clear(self)
         self.label.draw()
 
+
 class ConfirmationWindow(pyglet.window.Window):
 
     def __init__(self, selected_tests, *args, **kwargs):
@@ -51,6 +52,7 @@ class ConfirmationWindow(pyglet.window.Window):
         self.selected_tests = selected_tests
         self.background_color = (0.98, 0.98, 0.98, 1)
         self.labels = []
+        self.is_not_clicked = True
         self.vertex_list = pyglet.graphics.vertex_list(8, ('v2f', (
             # horizontal lines
             2 * self.width / 7,
@@ -128,8 +130,11 @@ class ConfirmationWindow(pyglet.window.Window):
             self.mouse_over_button.visible = False
 
     def on_mouse_press(self, x, y, button, modifiers):
+
         if 2 * self.width / 7 < x < 5 * self.width / 7 and \
-                                                0.25 * self.height / 7 < y < self.height / 7:
+                                                0.25 * self.height / 7 < y < self.height / 7 and self.is_not_clicked:
+            self.is_not_clicked = False
+            progress_window = ProgressWindow(width=500, height=100)
             self.confirm_label.text = 'PLEASE WAIT'
             obtained_values = []
             for mach, list_val in sorted(self.selected_tests.items()):
@@ -148,12 +153,22 @@ class ConfirmationWindow(pyglet.window.Window):
                         parent_test_name = item[1]
                     mach_index = text_labels.index(item[0])
                     indices = [i for i, x in enumerate(text_labels) if x == parent_test_name]
-                    print indices
+
                     final_index = (e for e in indices if e > mach_index).next()
                     self.labels[final_index].text = '%s: %s' % (item[1], item[2])
                 else:
-
                     qatrack.submit(qatrack.test_number(item[0], item[1]), item[2])
+                    if '_' in item[1]:
+                        parent_test_name = item[1][:4]
+                    else:
+                        parent_test_name = item[1]
+                    mach_index = text_labels.index(item[0])
+                    indices = [i for i, x in enumerate(text_labels) if x == parent_test_name]
+                    print 'input'
+                    print item[2]
+                    final_index = (e for e in indices if e > mach_index).next()
+                    self.labels[final_index].color = (163, 207, 95, 255)
+            progress_window.close()
             self.confirm_label.text = 'DONE'
 
 
@@ -383,8 +398,10 @@ class Window(pyglet.window.Window):
 
 def main():
     print 'creating window'
-    window = Window(width=1000, height=600, caption='QA Submitter v0.9')
+    window = Window(width=1000, height=600, caption='QA Submitter v1.0')
     pyglet.app.run()
+
+
 
 
 main()
