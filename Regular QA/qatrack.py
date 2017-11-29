@@ -43,6 +43,7 @@ def test_number(machine, test):
 
 def submit(test_url, values):
     length = len(values)
+    test_data = {}
     constant_data = {'csrfmiddlewaretoken': token,
                      "work_started": date + ' 12:00',
                      "work_completed": date + ' 12:30',
@@ -50,13 +51,17 @@ def submit(test_url, values):
                      "form-TOTAL_FORMS": str(length),
                      "form-INITIAL_FORMS": str(length),
                      "form-MAX_NUM_FORMS": "1000"}
-
-    test_data = {"form-%s-value" % n: values[n] for n in range(0, length)}
+    for n in range(0, length):
+        if values[n] == 'Yes':
+            test_data["form-%s-value" % n] = '1'
+        elif values[n] == 'No':
+            test_data["form-%s-value" % n] = '0'
+        else:
+            test_data["form-%s-value" % n] = values[n]
+    # test_data = {"form-%s-value" % n: values[n] for n in range(0, length)}
     submission_data = constant_data.copy()
     submission_data.update(test_data)
     resp = s.post(root + test_url, data=submission_data)
-
-
 
 
 
