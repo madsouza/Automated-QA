@@ -52,7 +52,11 @@ class tests:
                  'ML17_qMLC_15X': ['ML17-18', ['AD29', 'AD30', 'AD31', 'AD32', 'AD33', 'AD34', 'AD35', 'AD36', 'AD37']],
 
                  'DTRR': ['DTRR, DIME', ['T27']],
-                 'DIME': ['DTRR, DIME', ['T56']]}
+                 'DIME': ['DTRR, DIME', ['T56']],
+                 'BSIV': ['MSV BSIV', ['I53', 'P53', 'I56', 'P56', 'I59', 'P59', 'I62', 'P62']],
+                 'MSV': ['MSV BSIV', ['Q21', 'X21', 'AE21', 'Q24', 'X24', 'AE24', 'Q27', 'X27', 'AE27',
+                                      'Q30', 'X30', 'AE30', 'Q33', 'X33', 'AE33', 'Q36', 'X36', 'AE36']],
+                 }
 
     def get_test(self, machine, test_number):
         test_path = '%s/%s/*' % (path, machine)
