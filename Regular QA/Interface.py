@@ -52,7 +52,7 @@ class ConfirmationWindow(pyglet.window.Window):
         self.selected_tests = selected_tests
         self.background_color = (0.98, 0.98, 0.98, 1)
         self.labels = []
-        self.is_not_clicked = True
+        self.is_not_clicked = 0
         self.vertex_list = pyglet.graphics.vertex_list(8, ('v2f', (
             # horizontal lines
             2 * self.width / 7,
@@ -132,8 +132,9 @@ class ConfirmationWindow(pyglet.window.Window):
     def on_mouse_press(self, x, y, button, modifiers):
 
         if 2 * self.width / 7 < x < 5 * self.width / 7 and \
-                                                0.25 * self.height / 7 < y < self.height / 7 and self.is_not_clicked:
-            self.is_not_clicked = False
+                                                0.25 * self.height / 7 < y < self.height / 7 \
+                and self.is_not_clicked == 0:
+            self.is_not_clicked = 1
             progress_window = ProgressWindow(width=500, height=100)
             self.confirm_label.text = 'PLEASE WAIT'
             obtained_values = []
@@ -169,7 +170,13 @@ class ConfirmationWindow(pyglet.window.Window):
                     final_index = (e for e in indices if e > mach_index).next()
                     self.labels[final_index].color = (163, 207, 95, 255)
             progress_window.close()
+            self.is_not_clicked = 2
             self.confirm_label.text = 'DONE'
+
+        elif 2 * self.width / 7 < x < 5 * self.width / 7 and \
+                                                0.25 * self.height / 7 < y < self.height / 7 \
+              and self.is_not_clicked == 2:
+            self.close()
 
 
 class Window(pyglet.window.Window):
@@ -400,8 +407,6 @@ def main():
     print 'creating window'
     window = Window(width=1000, height=600, caption='QA Submitter v1.0')
     pyglet.app.run()
-
-
 
 
 main()
