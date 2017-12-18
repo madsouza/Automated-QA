@@ -3,6 +3,8 @@ from pyglet.gl import gl
 import Tests
 import os
 import qatrack
+import copy
+
 
 # copies files from qa folder and puts it in our directory
 os.system("del_copy.bat")
@@ -25,11 +27,33 @@ print organized_tests
 background_color = (0.98, 0.98, 0.98, 1)
 
 
+def resettable(f):
+    import copy
+
+    def __init_and_copy__(self, *args, **kwargs):
+        f(self, *args)
+        self.__original_dict__ = copy.deepcopy(self.__dict__)
+
+        def reset(o = self):
+            o.__dict__ = o.__original_dict__
+
+        self.reset = reset
+
+    return __init_and_copy__
+
+
+class AuthenticationWindow(pyglet.window.Window):
+    def __init__(self, *args, **kwargs):
+        super(AuthenticationWindow, self).__init__(*args, **kwargs)
+        self.width = AuthenticationWindow.width.__get__(self)
+        self.height = AuthenticationWindow.height.__get__(self)
+
+
 class ProgressWindow(pyglet.window.Window):
     def __init__(self, *args, **kwargs):
         super(ProgressWindow, self).__init__(*args, **kwargs)
-        self.width = ConfirmationWindow.width.__get__(self)
-        self.height = ConfirmationWindow.height.__get__(self)
+        self.width = ProgressWindow.width.__get__(self)
+        self.height = ProgressWindow.height.__get__(self)
         self.label = pyglet.text.Label('Please wait, submission in progress', font_name='Helvetica', font_size=20,
                                         x=250,
                                         y=50,
@@ -202,12 +226,65 @@ class Window(pyglet.window.Window):
         self.generate_button()
 
     def generate_labels_sprites(self):
+        pass
 
+    def generate_button(self):
+        self.vertex_list = pyglet.graphics.vertex_list(8, ('v2f', (  # horizontal lines
+            5.5 * self.width / 7,
+            6.9 * self.height / 7,
+            6.5 * self.width / 7,
+            6.9 * self.height / 7,
+
+            5.5 * self.width / 7,
+            6.5 * self.height / 7,
+            6.5 * self.width / 7,
+            6.5 * self.height / 7,
+
+            # vertical lines
+            5.5 * self.width / 7,
+            6.9 * self.height / 7,
+            5.5 * self.width / 7,
+            6.5 * self.height / 7,
+
+            6.5 * self.width / 7,
+            6.9 * self.height / 7,
+            6.5 * self.width / 7,
+            6.5 * self.height / 7,)),
+                                                       ('c3B', (0, 0, 200) * 8))
+        green = pyglet.image.load('green.png')
+        green.width = int(1.01 * self.width / 7)
+        green.height = int(0.4 * self.height / 7)
+        temp_sprite = pyglet.sprite.Sprite(green, x=5.5 * self.width / 7,
+                                           y=6.5 * self.height / 7)
+        item = 'button'
+        temp_sprite.visible = True
+        self.button_sprites.append([temp_sprite, temp_sprite.position, [temp_sprite.x + temp_sprite.width,
+                                                                        temp_sprite.y + temp_sprite.height],
+                                    item])
+
+        green = pyglet.image.load('green_2.jpg')
+        green.width = int(1.01 * self.width / 7)
+        green.height = int(0.4 * self.height / 7)
+        temp_sprite = pyglet.sprite.Sprite(green, x=5.5 * self.width / 7,
+                                           y=6.5 * self.height / 7)
+        item = 'button'
+        temp_sprite.visible = False
+        self.button_sprites.append([temp_sprite, temp_sprite.position, [temp_sprite.x + temp_sprite.width,
+                                                                        temp_sprite.y + temp_sprite.height],
+                                    item])
+
+        self.unique_test_labels.append(pyglet.text.Label('SUBMIT', font_name='Helvetica', font_size=14,
+                                                         x=6 * self.width / 7,
+                                                         y=6.7 * self.height / 7,
+                                                         anchor_x='center', anchor_y='center',
+                                                         color=(0, 147, 199, 255), bold=True))
+
+    def on_draw(self):
+        # #########################################################################
         self.label = pyglet.text.Label('QA submission', font_name='Helvetica', font_size=30,
                                        x=self.width // 2, y=self.height // 2,
                                        anchor_x='center', anchor_y='center', height=self.height,
                                        color=(0, 147, 199, 255))
-
         # display machine name and sprites at the top of the interface
         for i in range(1, 7):
             self.machineLabels.append(pyglet.text.Label('RT%s' % i,
@@ -279,59 +356,7 @@ class Window(pyglet.window.Window):
 
             [a.append(False) for a in self.tests_to_submit]
             count += 1
-
-    def generate_button(self):
-        self.vertex_list = pyglet.graphics.vertex_list(8, ('v2f', (  # horizontal lines
-            5.5 * self.width / 7,
-            6.9 * self.height / 7,
-            6.5 * self.width / 7,
-            6.9 * self.height / 7,
-
-            5.5 * self.width / 7,
-            6.5 * self.height / 7,
-            6.5 * self.width / 7,
-            6.5 * self.height / 7,
-
-            # vertical lines
-            5.5 * self.width / 7,
-            6.9 * self.height / 7,
-            5.5 * self.width / 7,
-            6.5 * self.height / 7,
-
-            6.5 * self.width / 7,
-            6.9 * self.height / 7,
-            6.5 * self.width / 7,
-            6.5 * self.height / 7,)),
-                                                       ('c3B', (0, 0, 200) * 8))
-        green = pyglet.image.load('green.png')
-        green.width = int(1.01 * self.width / 7)
-        green.height = int(0.4 * self.height / 7)
-        temp_sprite = pyglet.sprite.Sprite(green, x=5.5 * self.width / 7,
-                                           y=6.5 * self.height / 7)
-        item = 'button'
-        temp_sprite.visible = True
-        self.button_sprites.append([temp_sprite, temp_sprite.position, [temp_sprite.x + temp_sprite.width,
-                                                                        temp_sprite.y + temp_sprite.height],
-                                    item])
-
-        green = pyglet.image.load('green_2.jpg')
-        green.width = int(1.01 * self.width / 7)
-        green.height = int(0.4 * self.height / 7)
-        temp_sprite = pyglet.sprite.Sprite(green, x=5.5 * self.width / 7,
-                                           y=6.5 * self.height / 7)
-        item = 'button'
-        temp_sprite.visible = False
-        self.button_sprites.append([temp_sprite, temp_sprite.position, [temp_sprite.x + temp_sprite.width,
-                                                                        temp_sprite.y + temp_sprite.height],
-                                    item])
-
-        self.unique_test_labels.append(pyglet.text.Label('SUBMIT', font_name='Helvetica', font_size=14,
-                                                         x=6 * self.width / 7,
-                                                         y=6.7 * self.height / 7,
-                                                         anchor_x='center', anchor_y='center',
-                                                         color=(0, 147, 199, 255), bold=True))
-
-    def on_draw(self):
+        # ######################################################
         gl.glClearColor(*background_color)
         Window.clear(self)
         self.label.draw()
@@ -402,10 +427,13 @@ class Window(pyglet.window.Window):
 
             cycle = False
 
+    def on_resize(self, width, height):
+        super(Window, self).on_resize(width, height)
+
 
 def main():
     print 'creating window'
-    window = Window(width=1000, height=600, caption='QA Submitter v1.0')
+    window = Window(width=1000, height=600, caption='QA Submitter v1.1', resizable=True)
     pyglet.app.run()
 
 
