@@ -47,6 +47,7 @@ class AuthenticationWindow(pyglet.window.Window):
         super(AuthenticationWindow, self).__init__(*args, **kwargs)
         self.width = AuthenticationWindow.width.__get__(self)
         self.height = AuthenticationWindow.height.__get__(self)
+        self.instruction_label = pyglet.text.Label('Please log in using QA track Identifier')
 
 
 class ProgressWindow(pyglet.window.Window):
