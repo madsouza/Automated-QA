@@ -47,8 +47,70 @@ class AuthenticationWindow(pyglet.window.Window):
         super(AuthenticationWindow, self).__init__(*args, **kwargs)
         self.width = AuthenticationWindow.width.__get__(self)
         self.height = AuthenticationWindow.height.__get__(self)
-        self.instruction_label = pyglet.text.Label('Please log in using QA track Identifier')
+        self.labels = pyglet.graphics.Batch()
+        self.background_color = (0.98, 0.98, 0.98, 1)
+        self.instruction_label = pyglet.text.Label('Please log in using QA track login', font_name='Helvetica',
+                                                   font_size=12, x=100, y=175, color=(0, 147, 199, 255),
+                                                   bold=True, batch=self.labels)
+        self.user_text = pyglet.text.Label('Username', font_name='Helvetica', font_size=12, x=100, y=135,
+                                           color=(0, 147, 199, 255), bold=True, batch=self.labels)
+        self.pass_text = pyglet.text.Label('Password', font_size=12, x=100, y=85,
+                                           color=(0, 147, 199, 255), bold=True, batch=self.labels)
 
+        self.vertex_list = pyglet.graphics.vertex_list(16, ('v2f', (
+            # User name
+            # horizontal lines
+            200,
+            128,
+            400,
+            128,
+
+            200,
+            150,
+            400,
+            150,
+
+            # vertical lines
+            200,
+            128,
+            200,
+            150,
+
+            400,
+            128,
+            400,
+            150,
+
+            # password
+            # Horizontal lines
+            200,
+            100,
+            400,
+            100,
+
+            200,
+            78,
+            400,
+            78,
+
+            # Vertical lines
+            200,
+            100,
+            200,
+            78,
+
+            400,
+            100,
+            400,
+            78,
+            )),
+                                                       ('c3B', (0, 0, 200) * 16))
+
+    def on_draw(self):
+        gl.glClearColor(*background_color)
+        AuthenticationWindow.clear(self)
+        self.labels.draw()
+        self.vertex_list.draw(pyglet.gl.GL_LINES)
 
 class ProgressWindow(pyglet.window.Window):
     def __init__(self, *args, **kwargs):
@@ -434,7 +496,8 @@ class Window(pyglet.window.Window):
 
 def main():
     print 'creating window'
-    window = Window(width=1000, height=600, caption='QA Submitter v1.1', resizable=True)
+    authenticationWindow = AuthenticationWindow(width=500, height=200, caption='please log in')
+    # window = Window(width=1000, height=600, caption='QA Submitter v1.1', resizable=True)
     pyglet.app.run()
 
 
