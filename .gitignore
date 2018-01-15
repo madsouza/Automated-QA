@@ -8,3 +8,4 @@ Regular QA/user_info
 Regular QA/del_copy.bat
 build/
 dist/
+Regular QA/ignore.py
