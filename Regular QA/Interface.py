@@ -27,27 +27,13 @@ print organized_tests
 background_color = (0.98, 0.98, 0.98, 1)
 
 
-def resettable(f):
-    import copy
-
-    def __init_and_copy__(self, *args, **kwargs):
-        f(self, *args)
-        self.__original_dict__ = copy.deepcopy(self.__dict__)
-
-        def reset(o = self):
-            o.__dict__ = o.__original_dict__
-
-        self.reset = reset
-
-    return __init_and_copy__
-
-
 class AuthenticationWindow(pyglet.window.Window):
     def __init__(self, *args, **kwargs):
         super(AuthenticationWindow, self).__init__(*args, **kwargs)
         self.width = AuthenticationWindow.width.__get__(self)
         self.height = AuthenticationWindow.height.__get__(self)
         self.labels = pyglet.graphics.Batch()
+        self.spr = pyglet.graphics.Batch()
         self.background_color = (0.98, 0.98, 0.98, 1)
         self.instruction_label = pyglet.text.Label('Please log in using QA track login', font_name='Helvetica',
                                                    font_size=12, x=100, y=175, color=(0, 147, 199, 255),
@@ -106,11 +92,36 @@ class AuthenticationWindow(pyglet.window.Window):
             )),
                                                        ('c3B', (0, 0, 200) * 16))
 
+        white = pyglet.image.load('grey.png')
+        white.width = int(200)
+        white.height = int(22)
+        self.user_sprite = pyglet.sprite.Sprite(white, x=200, y=128, batch=self.spr)
+        self.user_sprite.visible = False
+        self.user_input = pyglet.text.Label('Username', font_name='Helvetica', font_size=12, x=205, y=135,
+                                            color=(0, 147, 199, 255),bold=True)
+
+        self.pass_sprite = pyglet.sprite.Sprite(white, x=200, y=78, batch=self.spr)
+        self.pass_sprite.visible = False
+
     def on_draw(self):
         gl.glClearColor(*background_color)
         AuthenticationWindow.clear(self)
         self.labels.draw()
+        self.spr.draw()
+        self.user_input.draw()
         self.vertex_list.draw(pyglet.gl.GL_LINES)
+
+    def on_mouse_press(self, x, y, button, modifiers):
+        if 200 < x < 400 and 128 < y < 150:
+            self.user_sprite.visible = True
+            self.pass_sprite.visible = False
+        elif 200 < x < 400 and 78 < y < 100:
+            self.user_sprite.visible = False
+            self.pass_sprite.visible = True
+        else:
+            self.user_sprite.visible = False
+            self.pass_sprite.visible = False
+
 
 class ProgressWindow(pyglet.window.Window):
     def __init__(self, *args, **kwargs):
