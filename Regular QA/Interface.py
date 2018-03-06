@@ -27,9 +27,46 @@ print organized_tests
 background_color = (0.98, 0.98, 0.98, 1)
 
 
+class Rectangle(object):
+    '''Draws a rectangle into a batch.'''
+
+    def __init__(self, x1, y1, x2, y2, batch):
+        self.vertex_list = batch.add(4, pyglet.gl.GL_QUADS, None,
+                                     ('v2i', [x1, y1, x2, y1, x2, y2, x1, y2]),
+                                     ('c4B', [200, 200, 220, 255] * 4)
+                                     )
+
+
+class TextWidget(object):
+    def __init__(self, text, x, y, width, batch):
+        self.document = pyglet.text.document.UnformattedDocument(text)
+        self.document.set_style(0, len(self.document.text),
+                                dict(color=(0, 0, 0, 255))
+                                )
+        font = self.document.get_font()
+        height = font.ascent - font.descent
+
+        self.layout = pyglet.text.layout.IncrementalTextLayout(
+            self.document, width, height, multiline=False, batch=batch)
+        self.caret = pyglet.text.caret.Caret(self.layout)
+
+        self.layout.x = x
+        self.layout.y = y
+
+        # Rectangular outline
+        pad = 2
+        self.rectangle = Rectangle(x - pad, y - pad,
+                                   x + width + pad, y + height + pad, batch)
+
+    def hit_test(self, x, y):
+        return (0 < x - self.layout.x < self.layout.width and
+                0 < y - self.layout.y < self.layout.height)
+
+
 class AuthenticationWindow(pyglet.window.Window):
     def __init__(self, *args, **kwargs):
         super(AuthenticationWindow, self).__init__(*args, **kwargs)
+        self.batch = pyglet.graphics.Batch()
         self.width = AuthenticationWindow.width.__get__(self)
         self.height = AuthenticationWindow.height.__get__(self)
         self.labels = pyglet.graphics.Batch()
@@ -97,11 +134,20 @@ class AuthenticationWindow(pyglet.window.Window):
         white.height = int(22)
         self.user_sprite = pyglet.sprite.Sprite(white, x=200, y=128, batch=self.spr)
         self.user_sprite.visible = False
-        self.user_input = pyglet.text.Label('Username', font_name='Helvetica', font_size=12, x=205, y=135,
+        self.user_input = pyglet.text.Label('', font_name='Helvetica', font_size=12, x=205, y=135,
                                             color=(0, 147, 199, 255),bold=True)
 
         self.pass_sprite = pyglet.sprite.Sprite(white, x=200, y=78, batch=self.spr)
-        self.pass_sprite.visible = False
+        self.pass_sprite.visible = True
+
+        self.widgets = [
+            TextWidget('user', 205, 130, self.width - 210, self.batch),
+            TextWidget('', 205, 80, self.width - 210, self.batch)
+        ]
+        self.text_cursor = self.get_system_mouse_cursor('text')
+
+        self.focus = None
+        self.set_focus(self.widgets[0])
 
     def on_draw(self):
         gl.glClearColor(*background_color)
@@ -110,6 +156,15 @@ class AuthenticationWindow(pyglet.window.Window):
         self.spr.draw()
         self.user_input.draw()
         self.vertex_list.draw(pyglet.gl.GL_LINES)
+        self.batch.draw()
+
+    def on_mouse_motion(self, x, y, dx, dy):
+        for widget in self.widgets:
+            if widget.hit_test(x, y):
+                self.set_mouse_cursor(self.text_cursor)
+                break
+        else:
+            self.set_mouse_cursor(None)
 
     def on_mouse_press(self, x, y, button, modifiers):
         if 200 < x < 400 and 128 < y < 150:
@@ -121,6 +176,61 @@ class AuthenticationWindow(pyglet.window.Window):
         else:
             self.user_sprite.visible = False
             self.pass_sprite.visible = False
+
+        for widget in self.widgets:
+            if widget.hit_test(x, y):
+                self.set_focus(widget)
+                break
+        else:
+            self.set_focus(None)
+
+        if self.focus:
+            self.focus.caret.on_mouse_press(x, y, button, modifiers)
+
+    def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
+        if self.focus:
+            self.focus.caret.on_mouse_drag(x, y, dx, dy, buttons, modifiers)
+
+    def on_text(self, text):
+        if self.focus:
+            self.focus.caret.on_text(text)
+
+    def on_text_motion(self, motion):
+        if self.focus:
+            self.focus.caret.on_text_motion(motion)
+
+    def on_text_motion_select(self, motion):
+        if self.focus:
+            self.focus.caret.on_text_motion_select(motion)
+
+    def on_key_press(self, symbol, modifiers):
+        if symbol == pyglet.window.key.TAB:
+            if modifiers & pyglet.window.key.MOD_SHIFT:
+                dir = -1
+            else:
+                dir = 1
+
+            if self.focus in self.widgets:
+                i = self.widgets.index(self.focus)
+            else:
+                i = 0
+                dir = 0
+
+            self.set_focus(self.widgets[(i + dir) % len(self.widgets)])
+
+        elif symbol == pyglet.window.key.ESCAPE:
+            pyglet.app.exit()
+
+    def set_focus(self, focus):
+        if self.focus:
+            self.focus.caret.visible = False
+            self.focus.caret.mark = self.focus.caret.position = 0
+
+        self.focus = focus
+        if self.focus:
+            self.focus.caret.visible = True
+            self.focus.caret.mark = 0
+            self.focus.caret.position = len(self.focus.document.text)
 
 
 class ProgressWindow(pyglet.window.Window):
