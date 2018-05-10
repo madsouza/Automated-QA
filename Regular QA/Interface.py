@@ -132,13 +132,20 @@ class AuthenticationWindow(pyglet.window.Window):
         white = pyglet.image.load('grey.png')
         white.width = int(200)
         white.height = int(22)
-        self.user_sprite = pyglet.sprite.Sprite(white, x=200, y=128, batch=self.spr)
-        self.user_sprite.visible = False
+        green = pyglet.image.load('green.png')
+        green.width = int(200)
+        green.height = int(30)
+
+        green2 = pyglet.image.load('green_2.jpg')
+        green2.width = int(200)
+        green2.height = int(30)
+        # self.user_sprite = pyglet.sprite.Sprite(white, x=200, y=128, batch=self.spr)
+        # self.user_sprite.visible = False
         self.user_input = pyglet.text.Label('', font_name='Helvetica', font_size=12, x=205, y=135,
                                             color=(0, 147, 199, 255),bold=True)
 
-        self.pass_sprite = pyglet.sprite.Sprite(white, x=200, y=78, batch=self.spr)
-        self.pass_sprite.visible = True
+        # self.pass_sprite = pyglet.sprite.Sprite(white, x=200, y=78, batch=self.spr)
+        # self.pass_sprite.visible = True
 
         self.widgets = [
             TextWidget('user', 205, 130, self.width - 210, self.batch),
@@ -149,14 +156,18 @@ class AuthenticationWindow(pyglet.window.Window):
         self.focus = None
         self.set_focus(self.widgets[0])
 
+        self.confirm_button = pyglet.sprite.Sprite(green, x=150, y=20, batch=self.spr)
+        self.confirm_text = pyglet.text.Label('Log In', font_name='Helvetica', font_size=12, x=225, y=28,
+                                              color=(0, 147, 199, 255), bold=True, batch=self.labels)
+
     def on_draw(self):
         gl.glClearColor(*background_color)
         AuthenticationWindow.clear(self)
-        self.labels.draw()
         self.spr.draw()
         self.user_input.draw()
         self.vertex_list.draw(pyglet.gl.GL_LINES)
         self.batch.draw()
+        self.labels.draw()
 
     def on_mouse_motion(self, x, y, dx, dy):
         for widget in self.widgets:
@@ -167,15 +178,15 @@ class AuthenticationWindow(pyglet.window.Window):
             self.set_mouse_cursor(None)
 
     def on_mouse_press(self, x, y, button, modifiers):
-        if 200 < x < 400 and 128 < y < 150:
-            self.user_sprite.visible = True
-            self.pass_sprite.visible = False
-        elif 200 < x < 400 and 78 < y < 100:
-            self.user_sprite.visible = False
-            self.pass_sprite.visible = True
-        else:
-            self.user_sprite.visible = False
-            self.pass_sprite.visible = False
+        # if 200 < x < 400 and 128 < y < 150:
+        #     self.user_sprite.visible = True
+        #     self.pass_sprite.visible = False
+        # elif 200 < x < 400 and 78 < y < 100:
+        #     self.user_sprite.visible = False
+        #     self.pass_sprite.visible = True
+        # else:
+        #     self.user_sprite.visible = False
+        #     self.pass_sprite.visible = False
 
         for widget in self.widgets:
             if widget.hit_test(x, y):
@@ -617,7 +628,7 @@ class Window(pyglet.window.Window):
 
 def main():
     print 'creating window'
-    authenticationWindow = AuthenticationWindow(width=500, height=200, caption='please log in')
+    authentication_window = AuthenticationWindow(width=500, height=200, caption='please log in')
     # window = Window(width=1000, height=600, caption='QA Submitter v1.1', resizable=True)
     pyglet.app.run()
 
