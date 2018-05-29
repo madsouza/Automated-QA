@@ -157,6 +157,8 @@ class AuthenticationWindow(pyglet.window.Window):
         self.set_focus(self.widgets[0])
 
         self.confirm_button = pyglet.sprite.Sprite(green, x=150, y=20, batch=self.spr)
+        self.confirm_button_active = pyglet.sprite.Sprite(green2, x=150, y=20, batch=self.spr)
+        self.confirm_button_active.visible = False
         self.confirm_text = pyglet.text.Label('Log In', font_name='Helvetica', font_size=12, x=225, y=28,
                                               color=(0, 147, 199, 255), bold=True, batch=self.labels)
 
@@ -178,15 +180,12 @@ class AuthenticationWindow(pyglet.window.Window):
             self.set_mouse_cursor(None)
 
     def on_mouse_press(self, x, y, button, modifiers):
-        # if 200 < x < 400 and 128 < y < 150:
-        #     self.user_sprite.visible = True
-        #     self.pass_sprite.visible = False
-        # elif 200 < x < 400 and 78 < y < 100:
-        #     self.user_sprite.visible = False
-        #     self.pass_sprite.visible = True
-        # else:
-        #     self.user_sprite.visible = False
-        #     self.pass_sprite.visible = False
+        if 150 < x < 350 and 20 < y < 50:
+            self.confirm_button_active.visible = True
+            self.confirm_button.visible = False
+        else:
+            self.confirm_button_active.visible = True
+            self.confirm_button.visible = False
 
         for widget in self.widgets:
             if widget.hit_test(x, y):
@@ -416,12 +415,36 @@ class Window(pyglet.window.Window):
         self.active_machine = 0
         #                      RT1 RT2 RT3 RT4 RT5 RT6
         self.tests_to_submit = [[], [], [], [], [], []]
+        # display machine name and sprites at the top of the interface
+        for i in range(1, 7):
+            self.machineLabels.append(pyglet.text.Label('RT%s' % i,
+                                                        font_name='Helvetica',
+                                                        font_size=14,
+                                                        x=i * self.width / 7,
+                                                        y=7 * self.height / 8,
+                                                        anchor_x='center', anchor_y='center', color=(0, 147, 199, 255)))
+
+            green = pyglet.image.load('green.png')
+            green.width = int(self.width / 7)
+            green.height = int(self.height / 8 - 40)
+
+            temp_sprite = pyglet.sprite.Sprite(green, x=i * self.width / 7 -
+                                                        self.width / 7 / 2,
+                                               y=(6.75 * self.height / 8))
+
+            # set the first machine label to be selected (default machine) by setting the visibility of the others to
+            #   False
+            if i > 1:
+                temp_sprite.visible = False
+
+            # store in list of the form [sprite, [x,y coordinates of bottom left], [x,y coordinates of top right]]
+            self.machine_sprites.append([temp_sprite, temp_sprite.position, [temp_sprite.x + temp_sprite.width,
+                                                                             temp_sprite.y + temp_sprite.height]])
         self.vertex_list = None
-        self.generate_labels_sprites()
         self.generate_button()
 
-    def generate_labels_sprites(self):
-        pass
+
+
 
     def generate_button(self):
         self.vertex_list = pyglet.graphics.vertex_list(8, ('v2f', (  # horizontal lines
@@ -480,31 +503,8 @@ class Window(pyglet.window.Window):
                                        x=self.width // 2, y=self.height // 2,
                                        anchor_x='center', anchor_y='center', height=self.height,
                                        color=(0, 147, 199, 255))
-        # display machine name and sprites at the top of the interface
-        for i in range(1, 7):
-            self.machineLabels.append(pyglet.text.Label('RT%s' % i,
-                                                        font_name='Helvetica',
-                                                        font_size=14,
-                                                        x=i * self.width / 7,
-                                                        y=7 * self.height / 8,
-                                                        anchor_x='center', anchor_y='center', color=(0, 147, 199, 255)))
 
-            green = pyglet.image.load('green.png')
-            green.width = int(self.width / 7)
-            green.height = int(self.height / 8 - 40)
 
-            temp_sprite = pyglet.sprite.Sprite(green, x=i * self.width / 7 -
-                                                        self.width / 7 / 2,
-                                               y=(6.75 * self.height / 8))
-
-            # set the first machine label to be selected (default machine) by setting the visibility of the others to
-            #   False
-            if i > 1:
-                temp_sprite.visible = False
-
-            # store in list of the form [sprite, [x,y coordinates of bottom left], [x,y coordinates of top right]]
-            self.machine_sprites.append([temp_sprite, temp_sprite.position, [temp_sprite.x + temp_sprite.width,
-                                                                             temp_sprite.y + temp_sprite.height]])
 
         # lets see how much space is left in the window
         remaining_space = [6.5 * self.height / 8, 0]
@@ -594,20 +594,22 @@ class Window(pyglet.window.Window):
 
                 if item[1][0] < x < item[2][0] and item[1][1] < y < item[2][1]:
                     if self.machine_sprites[n][0].visible:
-                        # print 'is visible'
+                        print 'is visible'
+
 
                         cycle = False
 
                     else:
-                        # print 'turned on'
+                        # print self.unique_test_sprites
                         self.machine_sprites[n][0].visible = not self.machine_sprites[n][0].visible
                         self.active_machine = n
-                        print self.active_machine
+                        # print self.active_machine
                         for a in range(0, len(self.machine_sprites)):
                             if a != n:
                                 self.machine_sprites[a][0].visible = False
 
                         for a in range(0, len(self.unique_test_sprites)):
+
                             self.unique_test_sprites[a][0].visible = self.tests_to_submit[self.active_machine][a]
 
                         cycle = False
@@ -617,7 +619,6 @@ class Window(pyglet.window.Window):
                 if item[1][0] < x < item[2][0] and item[1][1] < y < item[2][1]:
                     self.unique_test_sprites[n][0].visible = not self.unique_test_sprites[n][0].visible
                     self.tests_to_submit[self.active_machine][n] = self.unique_test_sprites[n][0].visible
-                    # print self.unique_test_sprites[n][0].visible
                     break
 
             cycle = False
@@ -628,9 +629,9 @@ class Window(pyglet.window.Window):
 
 def main():
     print 'creating window'
-    authentication_window = AuthenticationWindow(width=500, height=200, caption='please log in')
-    # window = Window(width=1000, height=600, caption='QA Submitter v1.1', resizable=True)
-    pyglet.app.run()
+    if qatrack.proceed:
+        window = Window(width=1000, height=600, caption='QA Submitter v1.1', resizable=False)
+        pyglet.app.run()
 
 
 main()
